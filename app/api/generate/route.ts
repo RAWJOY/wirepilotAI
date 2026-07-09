@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { generateProductPlan } from "@/lib/ai/generate";
+import {
+  generateCorePlan,
+  generateFlowAndScreens,
+  generatePRDAndStories,
+  generateSuccessMetrics,
+} from "@/lib/ai/generate";
 
 export async function POST(request: NextRequest) {
   const supabase = createClient();
 
-  // Step 1: Make sure someone is actually logged in.
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -23,15 +27,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Step 2: Create the project row right away, marked "generating".
-  const title = idea.trim().slice(0, 80);
+  const cleanIdea = idea.trim();
+  const title = cleanIdea.slice(0, 80);
 
   const { data: project, error: projectError } = await supabase
     .from("projects")
     .insert({
       user_id: user.id,
       title,
-      original_prompt: idea.trim(),
+      original_prompt: cleanIdea,
       status: "generating",
     })
     .select()
@@ -44,23 +48,46 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Step 3: Call the AI to generate the plan.
   try {
-    const plan = await generateProductPlan(idea.trim());
+    // Step 1: Core plan (summary, problem statement, goals, personas).
+    // Everything after this uses its output as context, so we run it first.
+    const core = await generateCorePlan(cleanIdea);
 
-    // Step 4: Save each section as its own row.
+    // Steps 2 and 3 both only need the core plan, so they can run
+    // at the same time to save time.
+    const [flow, metrics] = await Promise.all([
+      generateFlowAndScreens(cleanIdea, core),
+      generateSuccessMetrics(cleanIdea, core),
+    ]);
+
+    // Step 4 needs the screens from step 2, so it runs after.
+    const prdAndStories = await generatePRDAndStories(cleanIdea, core, flow);
+
     const rows = [
-      { project_id: project.id, doc_type: "summary", content: { text: plan.summary } },
+      { project_id: project.id, doc_type: "summary", content: { text: core.summary } },
       {
         project_id: project.id,
         doc_type: "problem_statement",
-        content: { text: plan.problem_statement },
+        content: { text: core.problem_statement },
       },
-      { project_id: project.id, doc_type: "goals", content: { items: plan.goals } },
+      { project_id: project.id, doc_type: "goals", content: { items: core.goals } },
+      { project_id: project.id, doc_type: "personas", content: { items: core.personas } },
+      { project_id: project.id, doc_type: "user_flow", content: { items: flow.user_flow } },
+      { project_id: project.id, doc_type: "screens", content: { items: flow.screens } },
       {
         project_id: project.id,
-        doc_type: "personas",
-        content: { items: plan.personas },
+        doc_type: "prd",
+        content: prdAndStories.prd,
+      },
+      {
+        project_id: project.id,
+        doc_type: "user_stories",
+        content: { items: prdAndStories.user_stories },
+      },
+      {
+        project_id: project.id,
+        doc_type: "metrics",
+        content: { items: metrics.metrics },
       },
     ];
 
@@ -72,7 +99,6 @@ export async function POST(request: NextRequest) {
       throw new Error(docsError.message);
     }
 
-    // Step 5: Mark the project as ready.
     await supabase
       .from("projects")
       .update({ status: "ready" })
@@ -80,8 +106,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ projectId: project.id });
   } catch (err) {
-    // If anything went wrong, mark the project as errored so the UI
-    // can show something sensible instead of hanging forever.
     await supabase
       .from("projects")
       .update({ status: "error" })

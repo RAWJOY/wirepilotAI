@@ -1,7 +1,56 @@
-// This file is the "brain connector" — it sends the user's idea to
-// Claude and asks for a structured product plan back as JSON.
+// This file is the "brain connector" — it sends prompts to Claude and
+// asks for structured product-management content back as JSON.
+// Each function below handles one focused piece of the overall product plan.
 
-export type GeneratedPlan = {
+// ---- Shared helper: calls Claude and parses its JSON response ----
+
+async function callClaudeForJSON<T>(
+  systemPrompt: string,
+  userMessage: string
+): Promise<T> {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": process.env.ANTHROPIC_API_KEY!,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-5",
+      max_tokens: 2000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userMessage }],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`AI request failed: ${response.status} ${errorText}`);
+  }
+
+  const data = await response.json();
+  const rawText: string = data.content?.[0]?.text ?? "";
+
+  // The AI sometimes wraps JSON in markdown fences even when told not to.
+  const cleaned = rawText
+    .trim()
+    .replace(/^```json/, "")
+    .replace(/^```/, "")
+    .replace(/```$/, "")
+    .trim();
+
+  try {
+    return JSON.parse(cleaned) as T;
+  } catch {
+    throw new Error(
+      "AI returned content that could not be understood as JSON."
+    );
+  }
+}
+
+// ---- 1. Core plan: Summary, Problem Statement, Goals, Personas ----
+
+export type CorePlan = {
   summary: string;
   problem_statement: string;
   goals: string[];
@@ -13,7 +62,7 @@ export type GeneratedPlan = {
   }[];
 };
 
-const SYSTEM_PROMPT = `You are a senior product manager. Given a short product idea from a user, generate a structured product plan.
+const CORE_PLAN_PROMPT = `You are a senior product manager. Given a short product idea from a user, generate a structured product plan.
 
 Respond with ONLY a valid JSON object, no other text, no markdown code fences. The JSON must match exactly this shape:
 
@@ -33,52 +82,132 @@ Respond with ONLY a valid JSON object, no other text, no markdown code fences. T
 
 Generate exactly 3 goals and exactly 2 personas. Be specific to the idea given, not generic.`;
 
-export async function generateProductPlan(
-  idea: string
-): Promise<GeneratedPlan> {
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": process.env.ANTHROPIC_API_KEY!,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-5",
-      max_tokens: 2000,
-      system: SYSTEM_PROMPT,
-      messages: [
-        {
-          role: "user",
-          content: `Product idea: ${idea}`,
-        },
-      ],
-    }),
-  });
+export function generateCorePlan(idea: string): Promise<CorePlan> {
+  return callClaudeForJSON<CorePlan>(
+    CORE_PLAN_PROMPT,
+    `Product idea: ${idea}`
+  );
+}
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`AI request failed: ${response.status} ${errorText}`);
-  }
+// ---- 2. User Flow, Screens, and Wireframe descriptions ----
 
-  const data = await response.json();
-  const rawText: string = data.content?.[0]?.text ?? "";
+export type FlowAndScreens = {
+  user_flow: string[];
+  screens: {
+    name: string;
+    purpose: string;
+    wireframe_elements: string[];
+  }[];
+};
 
-  // The AI sometimes wraps JSON in markdown fences even when told not to.
-  // This strips those out just in case, so parsing doesn't fail.
-  const cleaned = rawText
-    .trim()
-    .replace(/^```json/, "")
-    .replace(/^```/, "")
-    .replace(/```$/, "")
-    .trim();
+const FLOW_AND_SCREENS_PROMPT = `You are a senior UX designer. Given a product idea, its summary, and its personas, generate a user flow and a list of screens.
 
-  let parsed: GeneratedPlan;
-  try {
-    parsed = JSON.parse(cleaned);
-  } catch {
-    throw new Error("AI returned content that could not be understood as JSON.");
-  }
+Respond with ONLY a valid JSON object, no other text, no markdown fences, in exactly this shape:
 
-  return parsed;
+{
+  "user_flow": ["Step 1 description", "Step 2 description", "..."],
+  "screens": [
+    {
+      "name": "Screen name, e.g. 'Home Feed'",
+      "purpose": "One sentence describing what this screen is for",
+      "wireframe_elements": ["Header", "Search bar", "List of items", "Bottom navigation"]
+    }
+  ]
+}
+
+Generate 5-8 user flow steps and 5-8 screens covering the full journey from onboarding to core usage. Keep wireframe_elements simple and low-fidelity (layout blocks, not visual design).`;
+
+export function generateFlowAndScreens(
+  idea: string,
+  core: CorePlan
+): Promise<FlowAndScreens> {
+  const context = `Product idea: ${idea}
+Summary: ${core.summary}
+Personas: ${core.personas.map((p) => `${p.name} (${p.role})`).join(", ")}`;
+
+  return callClaudeForJSON<FlowAndScreens>(FLOW_AND_SCREENS_PROMPT, context);
+}
+
+// ---- 3. PRD, User Stories, and Acceptance Criteria ----
+
+export type PRDAndStories = {
+  prd: {
+    overview: string;
+    scope: string;
+    requirements: string[];
+  };
+  user_stories: {
+    story: string;
+    acceptance_criteria: string[];
+  }[];
+};
+
+const PRD_AND_STORIES_PROMPT = `You are a senior product manager writing a PRD (Product Requirements Document) and user stories.
+
+Respond with ONLY a valid JSON object, no other text, no markdown fences, in exactly this shape:
+
+{
+  "prd": {
+    "overview": "A short paragraph overview of the product",
+    "scope": "A short paragraph describing what is in scope for the first version",
+    "requirements": ["requirement 1", "requirement 2", "..."]
+  },
+  "user_stories": [
+    {
+      "story": "As a [persona], I want to [action], so that [benefit]",
+      "acceptance_criteria": ["criterion 1", "criterion 2"]
+    }
+  ]
+}
+
+Generate 5-8 requirements and 4-6 user stories, each with 2-3 acceptance criteria. Base the stories on the personas and screens given.`;
+
+export function generatePRDAndStories(
+  idea: string,
+  core: CorePlan,
+  flow: FlowAndScreens
+): Promise<PRDAndStories> {
+  const context = `Product idea: ${idea}
+Summary: ${core.summary}
+Goals: ${core.goals.join(", ")}
+Personas: ${core.personas.map((p) => `${p.name} (${p.role})`).join(", ")}
+Screens: ${flow.screens.map((s) => s.name).join(", ")}`;
+
+  return callClaudeForJSON<PRDAndStories>(PRD_AND_STORIES_PROMPT, context);
+}
+
+// ---- 4. Success Metrics ----
+
+export type SuccessMetrics = {
+  metrics: {
+    name: string;
+    description: string;
+    target: string;
+  }[];
+};
+
+const METRICS_PROMPT = `You are a senior product manager defining success metrics for a new product.
+
+Respond with ONLY a valid JSON object, no other text, no markdown fences, in exactly this shape:
+
+{
+  "metrics": [
+    {
+      "name": "Metric name, e.g. 'Activation Rate'",
+      "description": "One sentence describing what this measures",
+      "target": "A realistic first-version target, e.g. '40% of signups complete onboarding'"
+    }
+  ]
+}
+
+Generate exactly 4 metrics that map directly to the goals given.`;
+
+export function generateSuccessMetrics(
+  idea: string,
+  core: CorePlan
+): Promise<SuccessMetrics> {
+  const context = `Product idea: ${idea}
+Goals: ${core.goals.join(", ")}`;
+
+  return callClaudeForJSON<SuccessMetrics>(METRICS_PROMPT, context);
 }
