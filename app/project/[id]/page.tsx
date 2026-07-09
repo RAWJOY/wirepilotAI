@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import EditableSection from "./EditableSection";
+import ExportPdfButton from "./ExportPdfButton";
 
 type Persona = {
   name: string;
@@ -96,7 +97,32 @@ export default async function ProjectPage({
         ← Back to Dashboard
       </Link>
 
-      <h1 style={{ marginTop: "1rem" }}>{project.title}</h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginTop: "1rem",
+        }}
+      >
+        <h1 style={{ margin: 0 }}>{project.title}</h1>
+        {project.status === "ready" && (
+          <ExportPdfButton
+            data={{
+              title: project.title,
+              summary: summaryRow?.content?.text,
+              problemStatement: problemRow?.content?.text,
+              goals,
+              personas,
+              userFlow,
+              screens,
+              prd,
+              userStories,
+              metrics,
+            }}
+          />
+        )}
+      </div>
 
       {project.status === "generating" && (
         <p style={{ color: "#888" }}>
