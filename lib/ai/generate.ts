@@ -211,3 +211,77 @@ Goals: ${core.goals.join(", ")}`;
 
   return callClaudeForJSON<SuccessMetrics>(METRICS_PROMPT, context);
 }
+
+// ---- 5. Regenerating a single section on its own ----
+// Used when a user clicks "Regenerate" on just one part of their plan,
+// instead of re-running the whole pipeline.
+
+const SECTION_PROMPTS: Record<
+  string,
+  { instructions: string; shapeExample: string }
+> = {
+  summary: {
+    instructions: "Write a 2-3 sentence product summary.",
+    shapeExample: `{ "text": "..." }`,
+  },
+  problem_statement: {
+    instructions: "Write a clear paragraph describing the problem this product solves.",
+    shapeExample: `{ "text": "..." }`,
+  },
+  goals: {
+    instructions: "List exactly 3 product goals.",
+    shapeExample: `{ "items": ["goal 1", "goal 2", "goal 3"] }`,
+  },
+  personas: {
+    instructions:
+      "Generate exactly 2 user personas, each with a name, role, goals, and frustrations.",
+    shapeExample: `{ "items": [{ "name": "...", "role": "...", "goals": ["..."], "frustrations": ["..."] }] }`,
+  },
+  user_flow: {
+    instructions: "List 5-8 steps describing the user's journey through the product.",
+    shapeExample: `{ "items": ["Step 1...", "Step 2..."] }`,
+  },
+  screens: {
+    instructions:
+      "List 5-8 screens needed, each with a name, purpose, and simple wireframe_elements (layout blocks, not visual design).",
+    shapeExample: `{ "items": [{ "name": "...", "purpose": "...", "wireframe_elements": ["Header", "..."] }] }`,
+  },
+  prd: {
+    instructions:
+      "Write a PRD with an overview, scope, and 5-8 requirements.",
+    shapeExample: `{ "overview": "...", "scope": "...", "requirements": ["..."] }`,
+  },
+  user_stories: {
+    instructions:
+      "Generate 4-6 user stories in 'As a [persona], I want to [action], so that [benefit]' format, each with 2-3 acceptance criteria.",
+    shapeExample: `{ "items": [{ "story": "...", "acceptance_criteria": ["..."] }] }`,
+  },
+  metrics: {
+    instructions: "Generate exactly 4 success metrics with a name, description, and target.",
+    shapeExample: `{ "items": [{ "name": "...", "description": "...", "target": "..." }] }`,
+  },
+};
+
+export async function generateSingleSection(
+  docType: string,
+  idea: string,
+  contextSummary: string | null
+): Promise<unknown> {
+  const config = SECTION_PROMPTS[docType];
+
+  if (!config) {
+    throw new Error(`Unknown section type: ${docType}`);
+  }
+
+  const systemPrompt = `You are a senior product manager. ${config.instructions}
+
+Respond with ONLY a valid JSON object, no other text, no markdown fences, in exactly this shape:
+
+${config.shapeExample}`;
+
+  const userMessage = contextSummary
+    ? `Product idea: ${idea}\nProduct summary (for context): ${contextSummary}`
+    : `Product idea: ${idea}`;
+
+  return callClaudeForJSON<unknown>(systemPrompt, userMessage);
+}
