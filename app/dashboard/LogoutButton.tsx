@@ -14,16 +14,7 @@ export default function LogoutButton() {
   }
 
   return (
-    <button
-      onClick={handleLogout}
-      style={{
-        padding: "0.5rem 1rem",
-        borderRadius: 6,
-        border: "1px solid #ccc",
-        background: "#fff",
-        cursor: "pointer",
-      }}
-    >
+    <button onClick={handleLogout} className="wp-btn wp-btn-small">
       Log Out
     </button>
   );

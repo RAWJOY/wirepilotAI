@@ -1,0 +1,306 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+:root {
+  --paper: #faf9f6;
+  --paper-line: #e4e0d8;
+  --ink: #1a2238;
+  --ink-soft: #565f78;
+  --blueprint: #2c5f8a;
+  --blueprint-dark: #1f4560;
+  --amber: #e0a83f;
+  --sage: #3f7a5c;
+  --rust: #b3492f;
+  --card-bg: #ffffff;
+
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--paper);
+  background-image: linear-gradient(var(--paper-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--blueprint);
+}
+
+/* ---- Layout shell ---- */
+
+.wp-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.wp-container {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 4vw, 2.5rem) clamp(1rem, 4vw, 1.5rem);
+}
+
+/* ---- Cards with blueprint corner ticks ---- */
+
+.wp-card {
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--paper-line);
+  border-radius: 4px;
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.wp-card::before,
+.wp-card::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--blueprint);
+  opacity: 0.55;
+}
+
+.wp-card::before {
+  top: -1px;
+  left: -1px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.wp-card::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: none;
+  border-top: none;
+}
+
+/* ---- Section labels (the "blueprint annotation" signature) ---- */
+
+.wp-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blueprint);
+  display: inline-block;
+  margin-bottom: 0.35rem;
+}
+
+.wp-section {
+  margin-top: 2.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--paper-line);
+}
+
+.wp-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.wp-section-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* ---- Buttons ---- */
+
+.wp-btn {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.5rem 0.95rem;
+  border-radius: 4px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.wp-btn:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.wp-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.wp-btn-primary {
+  background: var(--blueprint);
+  border-color: var(--blueprint);
+  color: #fff;
+}
+
+.wp-btn-primary:hover:not(:disabled) {
+  background: var(--blueprint-dark);
+  border-color: var(--blueprint-dark);
+  color: #fff;
+}
+
+.wp-btn-small {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.65rem;
+}
+
+.wp-btn:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+/* ---- Form fields ---- */
+
+.wp-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  margin-bottom: 0.35rem;
+}
+
+.wp-input,
+.wp-textarea {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #c7cdd9;
+  background: #fff;
+  color: var(--ink);
+}
+
+.wp-textarea {
+  resize: vertical;
+  font-family: var(--font-body);
+}
+
+.wp-textarea-code {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+/* ---- Status + feedback text ---- */
+
+.wp-error {
+  color: var(--rust);
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+}
+
+.wp-success {
+  color: var(--sage);
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+}
+
+.wp-muted {
+  color: var(--ink-soft);
+}
+
+.wp-status-pill {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.wp-status-generating {
+  background: #fff3d6;
+  color: #8a6414;
+}
+
+.wp-status-ready {
+  background: #e3efe8;
+  color: var(--sage);
+}
+
+.wp-status-error {
+  background: #f7e3de;
+  color: var(--rust);
+}
+
+/* ---- Simple spinner for loading states ---- */
+
+.wp-spinner {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: wp-spin 0.6s linear infinite;
+  margin-right: 0.45em;
+  vertical-align: -0.15em;
+}
+
+@keyframes wp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wp-spinner {
+    animation: none;
+  }
+}
+
+/* ---- Wireframe block chips (used on Screens section) ---- */
+
+.wp-wireframe-box {
+  border: 1px dashed #b9c2d0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  background: #fbfbf9;
+}
+
+.wp-wireframe-chip {
+  border: 1px solid #d7dbe3;
+  border-radius: 3px;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  background: #fff;
+}

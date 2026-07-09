@@ -37,23 +37,9 @@ export default function NewProjectForm() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        background: "#fff",
-        border: "1px solid #e5e5e5",
-        borderRadius: 12,
-        padding: "1.5rem",
-        marginBottom: "2rem",
-      }}
-    >
-      <label
-        style={{
-          display: "block",
-          fontWeight: 600,
-          marginBottom: "0.5rem",
-        }}
-      >
+    <form onSubmit={handleSubmit} className="wp-card" style={{ marginBottom: "2rem" }}>
+      <span className="wp-tag">NEW PROJECT</span>
+      <label className="wp-label" style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--ink)", marginTop: "0.25rem" }}>
         Describe your product idea
       </label>
       <textarea
@@ -62,34 +48,12 @@ export default function NewProjectForm() {
         placeholder="e.g. Build a food delivery app for small towns"
         rows={3}
         required
-        style={{
-          width: "100%",
-          padding: "0.75rem",
-          borderRadius: 8,
-          border: "1px solid #ccc",
-          fontSize: "1rem",
-          fontFamily: "inherit",
-          marginBottom: "1rem",
-          resize: "vertical",
-        }}
+        className="wp-textarea"
+        style={{ marginBottom: "1rem", marginTop: "0.5rem" }}
       />
-      {error && (
-        <p style={{ color: "#c0392b", marginBottom: "1rem" }}>{error}</p>
-      )}
-      <button
-        type="submit"
-        disabled={loading}
-        style={{
-          padding: "0.7rem 1.4rem",
-          borderRadius: 8,
-          border: "none",
-          background: "#111",
-          color: "#fff",
-          fontSize: "1rem",
-          cursor: loading ? "default" : "pointer",
-          opacity: loading ? 0.7 : 1,
-        }}
-      >
+      {error && <p className="wp-error">{error}</p>}
+      <button type="submit" disabled={loading} className="wp-btn wp-btn-primary">
+        {loading && <span className="wp-spinner" />}
         {loading ? "Generating your product plan..." : "Generate"}
       </button>
     </form>

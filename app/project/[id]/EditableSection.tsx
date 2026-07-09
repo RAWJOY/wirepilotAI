@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 
 export default function EditableSection({
   documentId,
+  tag,
   title,
   rawContent,
   children,
 }: {
   documentId: string;
+  tag: string;
   title: string;
   rawContent: unknown;
   children: React.ReactNode;
@@ -71,42 +73,36 @@ export default function EditableSection({
   }
 
   return (
-    <section style={{ marginTop: "2rem" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "0.5rem",
-        }}
-      >
-        <h2 style={{ fontSize: "1.1rem", margin: 0 }}>{title}</h2>
+    <section className="wp-section">
+      <div className="wp-section-header">
+        <div>
+          <span className="wp-tag">{tag}</span>
+          <h2 className="wp-section-title">{title}</h2>
+        </div>
         <div style={{ display: "flex", gap: "0.5rem" }}>
           {mode === "view" && (
             <>
-              <button style={smallButtonStyle} onClick={() => setMode("edit")}>
+              <button className="wp-btn wp-btn-small" onClick={() => setMode("edit")}>
                 Edit
               </button>
               <button
-                style={smallButtonStyle}
+                className="wp-btn wp-btn-small"
                 onClick={handleRegenerate}
                 disabled={regenerating}
               >
+                {regenerating && <span className="wp-spinner" />}
                 {regenerating ? "Regenerating..." : "Regenerate"}
               </button>
             </>
           )}
           {mode === "edit" && (
             <>
-              <button
-                style={smallButtonStyle}
-                onClick={handleSave}
-                disabled={saving}
-              >
+              <button className="wp-btn wp-btn-small wp-btn-primary" onClick={handleSave} disabled={saving}>
+                {saving && <span className="wp-spinner" />}
                 {saving ? "Saving..." : "Save"}
               </button>
               <button
-                style={smallButtonStyle}
+                className="wp-btn wp-btn-small"
                 onClick={() => {
                   setJsonText(JSON.stringify(rawContent, null, 2));
                   setMode("view");
@@ -120,9 +116,7 @@ export default function EditableSection({
         </div>
       </div>
 
-      {error && (
-        <p style={{ color: "#c0392b", fontSize: "0.85rem" }}>{error}</p>
-      )}
+      {error && <p className="wp-error">{error}</p>}
 
       {mode === "view" ? (
         children
@@ -131,25 +125,9 @@ export default function EditableSection({
           value={jsonText}
           onChange={(e) => setJsonText(e.target.value)}
           rows={10}
-          style={{
-            width: "100%",
-            fontFamily: "monospace",
-            fontSize: "0.85rem",
-            padding: "0.75rem",
-            borderRadius: 6,
-            border: "1px solid #ccc",
-          }}
+          className="wp-textarea wp-textarea-code"
         />
       )}
     </section>
   );
 }
-
-const smallButtonStyle: React.CSSProperties = {
-  padding: "0.3rem 0.7rem",
-  fontSize: "0.8rem",
-  borderRadius: 6,
-  border: "1px solid #ccc",
-  background: "#fff",
-  cursor: "pointer",
-};

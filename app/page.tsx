@@ -2,49 +2,40 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "system-ui, sans-serif",
-        textAlign: "center",
-        padding: "2rem",
-      }}
-    >
-      <h1 style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>
-        🚀 WirePilot AI
-      </h1>
-      <p style={{ fontSize: "1.1rem", color: "#555", marginBottom: "1.5rem" }}>
-        Milestone 1: accounts and login are live.
-      </p>
-      <div style={{ display: "flex", gap: "1rem" }}>
-        <Link
-          href="/login"
+    <main className="wp-shell">
+      <div style={{ textAlign: "center", maxWidth: 480 }}>
+        <span className="wp-tag">WIREPILOT AI · PRODUCT WORKSPACE</span>
+        <h1
           style={{
-            padding: "0.7rem 1.4rem",
-            borderRadius: 6,
-            border: "1px solid #111",
-            color: "#111",
-            textDecoration: "none",
+            fontSize: "clamp(2rem, 6vw, 2.75rem)",
+            margin: "0.25rem 0 0.75rem",
           }}
         >
-          Log In
-        </Link>
-        <Link
-          href="/signup"
+          Idea in. Product plan out.
+        </h1>
+        <p
+          className="wp-muted"
+          style={{ fontSize: "1.05rem", marginBottom: "2rem" }}
+        >
+          Describe a product in plain English. Get a summary, personas, user
+          flow, wireframes, PRD, and user stories — drafted and ready to
+          edit.
+        </p>
+        <div
           style={{
-            padding: "0.7rem 1.4rem",
-            borderRadius: 6,
-            background: "#111",
-            color: "#fff",
-            textDecoration: "none",
+            display: "flex",
+            gap: "0.75rem",
+            justifyContent: "center",
+            flexWrap: "wrap",
           }}
         >
-          Sign Up
-        </Link>
+          <Link href="/login" className="wp-btn">
+            Log In
+          </Link>
+          <Link href="/signup" className="wp-btn wp-btn-primary">
+            Sign Up
+          </Link>
+        </div>
       </div>
     </main>
   );

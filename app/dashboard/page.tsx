@@ -21,35 +21,33 @@ export default async function DashboardPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        fontFamily: "system-ui, sans-serif",
-        padding: "2rem",
-        maxWidth: 700,
-        margin: "0 auto",
-      }}
-    >
+    <main className="wp-container">
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "1.5rem",
+          marginBottom: "0.5rem",
+          flexWrap: "wrap",
+          gap: "0.75rem",
         }}
       >
-        <h1>Your Dashboard</h1>
+        <div>
+          <span className="wp-tag">WIREPILOT AI</span>
+          <h1 style={{ fontSize: "1.6rem", margin: 0 }}>Dashboard</h1>
+        </div>
         <LogoutButton />
       </div>
+      <p className="wp-muted" style={{ marginTop: 0, marginBottom: "1.5rem" }}>
+        {user.email}
+      </p>
 
       <NewProjectForm />
 
-      <h2 style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
-        Your Projects
-      </h2>
+      <h2 style={{ fontSize: "1rem", marginBottom: "1rem" }}>Your Projects</h2>
 
       {(!projects || projects.length === 0) && (
-        <p style={{ color: "#666" }}>
+        <p className="wp-muted">
           No projects yet — describe an idea above to create your first one.
         </p>
       )}
@@ -59,20 +57,20 @@ export default async function DashboardPage() {
           <Link
             key={project.id}
             href={`/project/${project.id}`}
-            style={{
-              display: "block",
-              padding: "1rem",
-              border: "1px solid #e5e5e5",
-              borderRadius: 8,
-              textDecoration: "none",
-              color: "#111",
-            }}
+            className="wp-card"
+            style={{ textDecoration: "none", color: "var(--ink)", display: "block" }}
           >
             <strong>{project.title}</strong>
-            <div style={{ fontSize: "0.85rem", color: "#888", marginTop: 4 }}>
-              {project.status === "generating" && "⏳ Generating..."}
-              {project.status === "ready" && "✅ Ready"}
-              {project.status === "error" && "⚠️ Generation failed"}
+            <div style={{ marginTop: 8 }}>
+              {project.status === "generating" && (
+                <span className="wp-status-pill wp-status-generating">GENERATING</span>
+              )}
+              {project.status === "ready" && (
+                <span className="wp-status-pill wp-status-ready">READY</span>
+              )}
+              {project.status === "error" && (
+                <span className="wp-status-pill wp-status-error">FAILED</span>
+              )}
             </div>
           </Link>
         ))}

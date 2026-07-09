@@ -36,82 +36,44 @@ export default function LoginPage() {
   }
 
   return (
-    <main style={styles.wrapper}>
-      <form onSubmit={handleLogin} style={styles.card}>
-        <h1 style={styles.title}>Log in to WirePilot AI</h1>
+    <main className="wp-shell">
+      <form onSubmit={handleLogin} className="wp-card" style={{ width: "100%", maxWidth: 380 }}>
+        <span className="wp-tag">WIREPILOT AI</span>
+        <h1 style={{ fontSize: "1.4rem", margin: "0 0 1.5rem" }}>Log in</h1>
 
-        <label style={styles.label}>Email</label>
+        <label className="wp-label">Email</label>
         <input
           type="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={styles.input}
+          className="wp-input"
           placeholder="you@example.com"
+          style={{ marginBottom: "1rem" }}
         />
 
-        <label style={styles.label}>Password</label>
+        <label className="wp-label">Password</label>
         <input
           type="password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={styles.input}
+          className="wp-input"
           placeholder="Your password"
+          style={{ marginBottom: "1.25rem" }}
         />
 
-        {error && <p style={styles.error}>{error}</p>}
+        {error && <p className="wp-error">{error}</p>}
 
-        <button type="submit" disabled={loading} style={styles.button}>
+        <button type="submit" disabled={loading} className="wp-btn wp-btn-primary" style={{ width: "100%" }}>
+          {loading && <span className="wp-spinner" />}
           {loading ? "Logging in..." : "Log In"}
         </button>
 
-        <p style={styles.footerText}>
+        <p style={{ fontSize: "0.85rem", marginTop: "1.25rem", textAlign: "center" }}>
           Don&apos;t have an account? <Link href="/signup">Sign up</Link>
         </p>
       </form>
     </main>
   );
 }
-
-const styles: { [key: string]: React.CSSProperties } = {
-  wrapper: {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontFamily: "system-ui, sans-serif",
-    background: "#f7f7f8",
-  },
-  card: {
-    width: "100%",
-    maxWidth: 400,
-    background: "#fff",
-    padding: "2rem",
-    borderRadius: 12,
-    boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-    display: "flex",
-    flexDirection: "column",
-  },
-  title: { fontSize: "1.4rem", marginBottom: "1.5rem" },
-  label: { fontSize: "0.85rem", marginBottom: "0.3rem", color: "#333" },
-  input: {
-    padding: "0.6rem",
-    marginBottom: "1rem",
-    borderRadius: 6,
-    border: "1px solid #ccc",
-    fontSize: "1rem",
-  },
-  button: {
-    padding: "0.7rem",
-    borderRadius: 6,
-    border: "none",
-    background: "#111",
-    color: "#fff",
-    fontSize: "1rem",
-    cursor: "pointer",
-    marginTop: "0.5rem",
-  },
-  error: { color: "#c0392b", fontSize: "0.9rem", marginBottom: "0.5rem" },
-  footerText: { fontSize: "0.85rem", marginTop: "1rem", textAlign: "center" },
-};

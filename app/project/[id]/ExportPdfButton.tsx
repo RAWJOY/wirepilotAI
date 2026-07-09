@@ -177,19 +177,8 @@ export default function ExportPdfButton({ data }: { data: ExportData }) {
   }
 
   return (
-    <button
-      onClick={handleExport}
-      disabled={generating}
-      style={{
-        padding: "0.5rem 1rem",
-        borderRadius: 6,
-        border: "1px solid #111",
-        background: "#111",
-        color: "#fff",
-        cursor: "pointer",
-        fontSize: "0.9rem",
-      }}
-    >
+    <button onClick={handleExport} disabled={generating} className="wp-btn wp-btn-primary">
+      {generating && <span className="wp-spinner" />}
       {generating ? "Preparing PDF..." : "Export PDF"}
     </button>
   );

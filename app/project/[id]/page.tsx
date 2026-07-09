@@ -71,29 +71,18 @@ export default async function ProjectPage({
   const metricsRow = getRow("metrics");
 
   const goals = (goalsRow?.content?.items as string[] | undefined) ?? [];
-  const personas =
-    (personasRow?.content?.items as Persona[] | undefined) ?? [];
+  const personas = (personasRow?.content?.items as Persona[] | undefined) ?? [];
   const userFlow = (flowRow?.content?.items as string[] | undefined) ?? [];
-  const screens =
-    (screensRow?.content?.items as ScreenItem[] | undefined) ?? [];
+  const screens = (screensRow?.content?.items as ScreenItem[] | undefined) ?? [];
   const prd = prdRow?.content as
     | { overview: string; scope: string; requirements: string[] }
     | undefined;
-  const userStories =
-    (storiesRow?.content?.items as UserStory[] | undefined) ?? [];
+  const userStories = (storiesRow?.content?.items as UserStory[] | undefined) ?? [];
   const metrics = (metricsRow?.content?.items as Metric[] | undefined) ?? [];
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        fontFamily: "system-ui, sans-serif",
-        padding: "2rem",
-        maxWidth: 700,
-        margin: "0 auto",
-      }}
-    >
-      <Link href="/dashboard" style={{ color: "#666", fontSize: "0.9rem" }}>
+    <main className="wp-container">
+      <Link href="/dashboard" style={{ fontSize: "0.85rem" }} className="wp-muted">
         ← Back to Dashboard
       </Link>
 
@@ -101,11 +90,16 @@ export default async function ProjectPage({
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
-          marginTop: "1rem",
+          alignItems: "flex-start",
+          marginTop: "0.75rem",
+          gap: "1rem",
+          flexWrap: "wrap",
         }}
       >
-        <h1 style={{ margin: 0 }}>{project.title}</h1>
+        <div>
+          <span className="wp-tag">PRODUCT PLAN</span>
+          <h1 style={{ margin: 0, fontSize: "1.6rem" }}>{project.title}</h1>
+        </div>
         {project.status === "ready" && (
           <ExportPdfButton
             data={{
@@ -125,46 +119,44 @@ export default async function ProjectPage({
       </div>
 
       {project.status === "generating" && (
-        <p style={{ color: "#888" }}>
-          ⏳ Still generating — refresh this page in a few seconds.
+        <p style={{ marginTop: "1.5rem" }}>
+          <span className="wp-status-pill wp-status-generating">
+            <span className="wp-spinner" style={{ marginRight: 6 }} />
+            GENERATING
+          </span>
+          <br />
+          <span className="wp-muted" style={{ fontSize: "0.9rem" }}>
+            Refresh this page in a few seconds.
+          </span>
         </p>
       )}
 
       {project.status === "error" && (
-        <p style={{ color: "#c0392b" }}>
-          ⚠️ Something went wrong generating this project. Try creating a new
-          one.
+        <p style={{ marginTop: "1.5rem" }}>
+          <span className="wp-status-pill wp-status-error">FAILED</span>
+          <br />
+          <span className="wp-muted" style={{ fontSize: "0.9rem" }}>
+            Something went wrong generating this project. Try creating a new one.
+          </span>
         </p>
       )}
 
       {project.status === "ready" && (
         <>
           {summaryRow && (
-            <EditableSection
-              documentId={summaryRow.id}
-              title="Product Summary"
-              rawContent={summaryRow.content}
-            >
+            <EditableSection documentId={summaryRow.id} tag="01 / SUMMARY" title="Product Summary" rawContent={summaryRow.content}>
               <p>{summaryRow.content?.text}</p>
             </EditableSection>
           )}
 
           {problemRow && (
-            <EditableSection
-              documentId={problemRow.id}
-              title="Problem Statement"
-              rawContent={problemRow.content}
-            >
+            <EditableSection documentId={problemRow.id} tag="02 / PROBLEM" title="Problem Statement" rawContent={problemRow.content}>
               <p>{problemRow.content?.text}</p>
             </EditableSection>
           )}
 
           {goalsRow && (
-            <EditableSection
-              documentId={goalsRow.id}
-              title="Goals"
-              rawContent={goalsRow.content}
-            >
+            <EditableSection documentId={goalsRow.id} tag="03 / GOALS" title="Goals" rawContent={goalsRow.content}>
               <ul>
                 {goals.map((goal, i) => (
                   <li key={i}>{goal}</li>
@@ -174,11 +166,7 @@ export default async function ProjectPage({
           )}
 
           {personasRow && (
-            <EditableSection
-              documentId={personasRow.id}
-              title="User Personas"
-              rawContent={personasRow.content}
-            >
+            <EditableSection documentId={personasRow.id} tag="04 / PERSONAS" title="User Personas" rawContent={personasRow.content}>
               <CardList>
                 {personas.map((persona, i) => (
                   <Card key={i}>
@@ -189,8 +177,7 @@ export default async function ProjectPage({
                       <strong>Goals:</strong> {persona.goals?.join("; ")}
                     </p>
                     <p style={{ margin: 0 }}>
-                      <strong>Frustrations:</strong>{" "}
-                      {persona.frustrations?.join("; ")}
+                      <strong>Frustrations:</strong> {persona.frustrations?.join("; ")}
                     </p>
                   </Card>
                 ))}
@@ -199,11 +186,7 @@ export default async function ProjectPage({
           )}
 
           {flowRow && (
-            <EditableSection
-              documentId={flowRow.id}
-              title="User Flow"
-              rawContent={flowRow.content}
-            >
+            <EditableSection documentId={flowRow.id} tag="05 / USER FLOW" title="User Flow" rawContent={flowRow.content}>
               <ol>
                 {userFlow.map((step, i) => (
                   <li key={i} style={{ marginBottom: 4 }}>
@@ -215,39 +198,17 @@ export default async function ProjectPage({
           )}
 
           {screensRow && (
-            <EditableSection
-              documentId={screensRow.id}
-              title="Screens & Low-Fidelity Wireframes"
-              rawContent={screensRow.content}
-            >
+            <EditableSection documentId={screensRow.id} tag="06 / SCREENS" title="Screens & Low-Fidelity Wireframes" rawContent={screensRow.content}>
               <CardList>
                 {screens.map((screen, i) => (
                   <Card key={i}>
                     <strong>{screen.name}</strong>
-                    <p style={{ margin: "4px 0 8px", color: "#555" }}>
+                    <p style={{ margin: "4px 0 8px" }} className="wp-muted">
                       {screen.purpose}
                     </p>
-                    <div
-                      style={{
-                        border: "1px dashed #bbb",
-                        borderRadius: 6,
-                        padding: "0.75rem",
-                        background: "#fafafa",
-                      }}
-                    >
+                    <div className="wp-wireframe-box">
                       {screen.wireframe_elements?.map((el, j) => (
-                        <div
-                          key={j}
-                          style={{
-                            border: "1px solid #ccc",
-                            borderRadius: 4,
-                            padding: "0.4rem 0.6rem",
-                            marginBottom: 6,
-                            fontSize: "0.85rem",
-                            color: "#666",
-                            background: "#fff",
-                          }}
-                        >
+                        <div key={j} className="wp-wireframe-chip">
                           {el}
                         </div>
                       ))}
@@ -259,11 +220,7 @@ export default async function ProjectPage({
           )}
 
           {prdRow && (
-            <EditableSection
-              documentId={prdRow.id}
-              title="Product Requirements Document (PRD)"
-              rawContent={prdRow.content}
-            >
+            <EditableSection documentId={prdRow.id} tag="07 / PRD" title="Product Requirements Document" rawContent={prdRow.content}>
               <p>
                 <strong>Overview:</strong> {prd?.overview}
               </p>
@@ -282,11 +239,7 @@ export default async function ProjectPage({
           )}
 
           {storiesRow && (
-            <EditableSection
-              documentId={storiesRow.id}
-              title="User Stories & Acceptance Criteria"
-              rawContent={storiesRow.content}
-            >
+            <EditableSection documentId={storiesRow.id} tag="08 / USER STORIES" title="User Stories & Acceptance Criteria" rawContent={storiesRow.content}>
               <CardList>
                 {userStories.map((story, i) => (
                   <Card key={i}>
@@ -303,17 +256,13 @@ export default async function ProjectPage({
           )}
 
           {metricsRow && (
-            <EditableSection
-              documentId={metricsRow.id}
-              title="Success Metrics"
-              rawContent={metricsRow.content}
-            >
+            <EditableSection documentId={metricsRow.id} tag="09 / METRICS" title="Success Metrics" rawContent={metricsRow.content}>
               <CardList>
                 {metrics.map((metric, i) => (
                   <Card key={i}>
                     <strong>{metric.name}</strong>
                     <p style={{ margin: "4px 0" }}>{metric.description}</p>
-                    <p style={{ margin: 0, color: "#555" }}>
+                    <p style={{ margin: 0 }} className="wp-muted">
                       Target: {metric.target}
                     </p>
                   </Card>
@@ -328,23 +277,9 @@ export default async function ProjectPage({
 }
 
 function CardList({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      {children}
-    </div>
-  );
+  return <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>{children}</div>;
 }
 
 function Card({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      style={{
-        border: "1px solid #e5e5e5",
-        borderRadius: 8,
-        padding: "1rem",
-      }}
-    >
-      {children}
-    </div>
-  );
+  return <div className="wp-card">{children}</div>;
 }
